@@ -14,8 +14,8 @@ app.use(fileUpload());
 app.use(
   cors({
     origin: [
-      "https://daily-planner-test.vercel.app",
-      "https://daily-planner-live.vercel.app",
+      "https://test.dailyplanner.site",
+      "https://dailyplanner.site",
       "http://localhost:3000",
     ],
     credentials: true,
