@@ -14,15 +14,16 @@ app.use(fileUpload());
 app.use(
   cors({
     origin: [
-      "https://daily-planner-back.onrender.com",
-      "https://daily-planner-back-1.onrender.com",
-      "http://localhost:4000",
-      "http://localhost:5173",
+      "https://daily-planner-test.vercel.app",
+      "https://daily-planner-live.vercel.app",
+      "http://localhost:3000",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+app.options("*", cors());
+
 app.use("/api/v1/user", usersRoutes);
 app.use("/api/v1/code", codesRoutes);
 
