@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Users from "../models/Users.js";
+import Codes from "../models/Codes.js";
 import { SECRET_KEY } from "../config.js";
 import { uploadFile, deleteFile } from "../libs/cloudinary.js";
 
@@ -13,12 +14,12 @@ export const createUser = async (req, res) => {
     });
     if (existingUser) {
       return res.status(400).json({
-        message: "User already exists",
+        code: "USER_ALREADY_EXISTS",
       });
     }
     if (password !== confirmPassword) {
       return res.status(400).json({
-        message: "Passwords do not match",
+        code: "PASSWORDS_DO_NOT_MATCH",
       });
     }
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -39,14 +40,102 @@ export const createUser = async (req, res) => {
       }
     );
     res.status(201).json({
-      result,
-      token,
+      name: result.name,
+      email: result.email,
+      id: result._id,
+      token: token,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Something went wrong",
+      code: "SERVER_ERROR",
     });
   }
+};
+
+export const signIn = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await Users.findOne({
+      email: email,
+    });
+    if (!user) {
+      return res.status(400).json({
+        code: "USER_NOT_FOUND",
+      });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        code: "INVALID_PASSWORD",
+      });
+    }
+    const token = jwt.sign(
+      {
+        email: user.email,
+        id: user._id,
+        name: user.name,
+      },
+      SECRET_KEY,
+      {
+        expiresIn: "1d",
+      }
+    );
+    res.status(200).json({
+      name: user.name,
+      email: user.email,
+      id: user._id,
+      token: token,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: "SERVER_ERROR",
+    });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  const { password, email } = req.body;
+  try {
+    const user = await Users.findOne({
+      email: email,
+    });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const result = await Users.findByIdAndUpdate(user._id, {
+      password: hashedPassword,
+    });
+
+    res.status(200).json({
+      name: result.name,
+      email: result.email,
+      id: result._id,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: "SERVER_ERROR",
+    });
+  }
+};
+
+export const checkToken = async (req, res) => {
+  const token = jwt.sign(
+    {
+      name: req.user.name,
+      email: req.user.email,
+      id: req.user.id,
+    },
+    SECRET_KEY,
+    {
+      expiresIn: "1d",
+    }
+  );
+  req.token = token;
+  res.status(200).json({
+    name: req.user.name,
+    email: req.user.email,
+    id: req.user.id,
+    token: token,
+  });
 };
 
 export const dumy = async (req, res) => {
