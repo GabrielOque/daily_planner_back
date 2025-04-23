@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Users from "../models/Users.js";
-import Codes from "../models/Codes.js";
-import { SECRET_KEY } from "../config.js";
+import { SECRET_KEY, FRONTEND_URL } from "../config.js";
 import { uploadFile, deleteFile } from "../libs/cloudinary.js";
+import { generateTokenLiveKit } from "../utils/generateTokenLiveKit.js";
 
 export const createUser = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
@@ -152,4 +152,35 @@ export const dumy = async (req, res) => {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
   }
+};
+
+export const joinMeeting = async (req, res) => {
+  const { roomName, userName } = req.body;
+
+  if (!roomName || !userName) {
+    return res.status(400).json({ code: "ROOM_NAME_OR_USER_NAME_MISSING" });
+  }
+
+  const token = await generateTokenLiveKit(userName, roomName);
+
+  res.json({ token: token });
+};
+
+export const createMeeting = async (req, res) => {
+  const { roomName, userName } = req.body;
+
+  // Validar si faltan los parámetros necesarios
+  if (!roomName || !userName) {
+    return res.status(400).json({ code: "ROOM_NAME_OR_USER_NAME_MISSING" });
+  }
+
+  // Generar el token para el usuario y la sala
+  const token = await generateTokenLiveKit(userName, roomName); // Esto debería devolver el JWT
+
+  // Devolver la respuesta con el token y el link de la sala
+  res.json({
+    token, // El token ahora debería ser un JWT válido
+    roomName,
+    url: `${FRONTEND_URL}/planner/join-meeting?roomName=${roomName}&userName=${userName}`, // Link a la reunión en tu app
+  });
 };
