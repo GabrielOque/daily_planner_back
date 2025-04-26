@@ -138,6 +138,28 @@ export const checkToken = async (req, res) => {
   });
 };
 
+export const searchUserFromEvent = async (req, res) => {
+  const { email } = req.query;
+  try {
+    const user = await Users.findOne({
+      email: email,
+    });
+    if (!user) {
+      return res.status(400).json({
+        code: "USER_NOT_FOUND",
+      });
+    }
+    res.status(200).json({
+      email: user.email,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      code: "SERVER_ERROR",
+    });
+  }
+};
+
 export const dumy = async (req, res) => {
   try {
     const file = req.files.file;

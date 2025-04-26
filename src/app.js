@@ -4,6 +4,7 @@ import cors from "cors";
 
 import usersRoutes from "./routes/users.routes.js";
 import codesRoutes from "./routes/codes.routes.js";
+import eventsRoutes from "./routes/events.routes.js";
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.options("*", cors());
 
 app.use("/api/v1/user", usersRoutes);
 app.use("/api/v1/code", codesRoutes);
+app.use("/api/v1/event", eventsRoutes);
 
 export default app;
