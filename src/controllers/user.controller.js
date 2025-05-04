@@ -33,6 +33,7 @@ export const createUser = async (req, res) => {
         email: result.email,
         id: result._id,
         name: result.name,
+        image: result.image,
       },
       SECRET_KEY,
       {
@@ -43,6 +44,7 @@ export const createUser = async (req, res) => {
       name: result.name,
       email: result.email,
       id: result._id,
+      image: result.image,
       token: token,
     });
   } catch (error) {
@@ -74,6 +76,7 @@ export const signIn = async (req, res) => {
         email: user.email,
         id: user._id,
         name: user.name,
+        image: user.image,
       },
       SECRET_KEY,
       {
@@ -84,6 +87,7 @@ export const signIn = async (req, res) => {
       name: user.name,
       email: user.email,
       id: user._id,
+      image: user.image,
       token: token,
     });
   } catch (error) {
@@ -109,6 +113,7 @@ export const changePassword = async (req, res) => {
       name: result.name,
       email: result.email,
       id: result._id,
+      image: result.image,
     });
   } catch (error) {
     res.status(500).json({
@@ -123,6 +128,7 @@ export const checkToken = async (req, res) => {
       name: req.user.name,
       email: req.user.email,
       id: req.user.id,
+      image: req.user.image,
     },
     SECRET_KEY,
     {
@@ -134,8 +140,77 @@ export const checkToken = async (req, res) => {
     name: req.user.name,
     email: req.user.email,
     id: req.user.id,
+    image: req.user.image,
     token: token,
   });
+};
+
+export const updateUser = async (req, res) => {
+  let dataToUpdate = {};
+  const { name, password } = req.body;
+  const file = req.files?.image;
+  try {
+    const user = await Users.findById(req.user.id);
+    if (!user) {
+      return res.status(400).json({
+        code: "USER_NOT_FOUND",
+      });
+    }
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      dataToUpdate.password = hashedPassword;
+    }
+    if (name) {
+      dataToUpdate.name = name;
+    }
+    if (file?.data) {
+      const folder = `Avatars/${req.user.name}_${req.user.id}`;
+      const { public_id, secure_url } = await uploadFile(file.data, folder);
+      if (!public_id || !secure_url) {
+        return res.status(400).json({
+          code: "FILE_NOT_UPLOADED",
+        });
+      }
+      dataToUpdate.image = { public_id, secure_url };
+    }
+
+    const updatedUser = await Users.findByIdAndUpdate(
+      req.user.id,
+      dataToUpdate,
+      {
+        new: true,
+      }
+    );
+    if (!updatedUser) {
+      return res.status(400).json({
+        code: "USER_NOT_FOUND",
+      });
+    }
+    const token = jwt.sign(
+      {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        id: updatedUser._id,
+        image: updatedUser.image,
+      },
+      SECRET_KEY,
+      {
+        expiresIn: "1d",
+      }
+    );
+    res.status(200).json({
+      name: updatedUser.name,
+      email: updatedUser.email,
+      id: updatedUser._id,
+      image: updatedUser.image,
+      token: token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      code: "SERVER_ERROR",
+    });
+  }
 };
 
 export const searchUserFromEvent = async (req, res) => {
@@ -151,6 +226,7 @@ export const searchUserFromEvent = async (req, res) => {
     }
     res.status(200).json({
       email: user.email,
+      image: user.image,
     });
   } catch (error) {
     console.log(error);

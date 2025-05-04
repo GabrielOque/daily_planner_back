@@ -13,6 +13,10 @@ const usersSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    secure_url: { type: String, default: null },
+    public_id: { type: String, default: null },
+  },
 });
 
 export default mongoose.model("User", usersSchema);
