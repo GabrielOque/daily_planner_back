@@ -16,3 +16,5 @@ export const NODE_MAILER_API_KEY = process.env.NODE_MAILER_API_KEY;
 export const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;
 export const LIVEKIT_SECRET_KEY = process.env.LIVEKIT_SECRET_KEY;
 export const FRONTEND_URL = process.env.FRONTEND_URL;
+
+export const STAGE = process.env.STAGE || "DEV";

@@ -3,6 +3,7 @@ import Lists from "../models/Lists.js";
 import Tags from "../models/Tags.js";
 import { DateTime } from "luxon";
 import { uploadFile, deleteFile } from "../libs/cloudinary.js";
+import { STAGE } from "../config.js";
 
 export const createTask = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ export const createTask = async (req, res) => {
     let newFile = { public_id: null, secure_url: null };
 
     if (file?.data) {
-      const folder = `Files/${req.user.name}_${req.user.id}`;
+      const folder = `DailyPlanner/${STAGE}/Files/${req.user.name}_${req.user.id}`;
       const { public_id, secure_url } = await uploadFile(file.data, folder);
       newFile = { public_id, secure_url };
     }
@@ -94,7 +95,7 @@ export const updateTask = async (req, res) => {
     let newFile = { public_id: null, secure_url: null };
 
     if (file?.data) {
-      const folder = `Files/${req.user.name}_${req.user.id}`;
+      const folder = `DailyPlanner/${STAGE}/Files/${req.user.name}_${req.user.id}`;
       const { public_id, secure_url } = await uploadFile(file.data, folder);
       newFile = { public_id, secure_url };
     }

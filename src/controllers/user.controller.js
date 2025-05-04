@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Users from "../models/Users.js";
-import { SECRET_KEY, FRONTEND_URL } from "../config.js";
+import { SECRET_KEY, FRONTEND_URL, STAGE } from "../config.js";
 import { uploadFile, deleteFile } from "../libs/cloudinary.js";
 import { generateTokenLiveKit } from "../utils/generateTokenLiveKit.js";
 
@@ -164,7 +164,7 @@ export const updateUser = async (req, res) => {
       dataToUpdate.name = name;
     }
     if (file?.data) {
-      const folder = `Avatars/${req.user.name}_${req.user.id}`;
+      const folder = `DailyPlanner/${STAGE}/Avatars/${req.user.name}_${req.user.id}`;
       const { public_id, secure_url } = await uploadFile(file.data, folder);
       if (!public_id || !secure_url) {
         return res.status(400).json({
