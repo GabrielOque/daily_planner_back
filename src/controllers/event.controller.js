@@ -43,7 +43,7 @@ export const createEvent = async (req, res) => {
     });
 
     await sendInvitationEmail({
-      to: [...participants, coordinator],
+      to: participants,
       name,
       userName: user.name,
       userEmail: coordinator,
@@ -93,7 +93,7 @@ export const updateEvent = async (req, res) => {
     });
 
     await sendUpdateNotification({
-      to: [...participants, req.user.email],
+      to: participants,
       name,
       userName: user.name,
       userEmail: req.user.email,
@@ -130,7 +130,7 @@ export const deleteEvent = async (req, res) => {
 
     await transporter.sendMail({
       from: '"Daily Planner" <oquendodev@gmail.com>',
-      to: [...event.participants, event.coordinator],
+      to: event.participants,
       subject: `Cancelación: ${event.name}`,
       html: `
       <p>Hola, ${event.coordinator} ha cancelado ${event.name}</p>

@@ -8,6 +8,7 @@ import codesRoutes from "./routes/codes.routes.js";
 import eventsRoutes from "./routes/events.routes.js";
 import listsRouters from "./routes/lists.routes.js";
 import tasksRouters from "./routes/tasks.routes.js";
+import notesRoutes from "./routes/notes.routes.js";
 
 const app = express();
 
@@ -34,5 +35,6 @@ app.use("/api/v1/code", codesRoutes);
 app.use("/api/v1/event", eventsRoutes);
 app.use("/api/v1/list", listsRouters);
 app.use("/api/v1/task", tasksRouters);
+app.use("/api/v1/note", notesRoutes);
 
 export default app;
