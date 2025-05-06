@@ -42,17 +42,20 @@ export const createEvent = async (req, res) => {
       roomName,
     });
 
-    await sendInvitationEmail({
-      to: participants,
-      name,
-      userName: user.name,
-      userEmail: coordinator,
-      description,
-      startDate,
-      startTime,
-      endTime,
-      roomName,
-    });
+    if (participants.length > 0) {
+      await sendInvitationEmail({
+        to: participants,
+        name,
+        userName: user.name,
+        userEmail: coordinator,
+        description,
+        startDate,
+        startTime,
+        endTime,
+        roomName,
+      });
+    }
+
     res.status(201).json({
       code: "EVENT_CREATED",
     });
@@ -88,21 +91,23 @@ export const updateEvent = async (req, res) => {
       return res.status(404).json({ code: "EVENT_NOT_FOUND" });
     }
 
-    const user = await Users.findOne({
-      email: req.user.email,
-    });
+    if (participants.length > 0) {
+      const user = await Users.findOne({
+        email: req.user.email,
+      });
 
-    await sendUpdateNotification({
-      to: participants,
-      name,
-      userName: user.name,
-      userEmail: req.user.email,
-      description,
-      startDate,
-      startTime,
-      endTime,
-      roomName: event.roomName,
-    });
+      await sendUpdateNotification({
+        to: participants,
+        name,
+        userName: user.name,
+        userEmail: req.user.email,
+        description,
+        startDate,
+        startTime,
+        endTime,
+        roomName: event.roomName,
+      });
+    }
 
     res.status(200).json(event);
   } catch (error) {
@@ -128,21 +133,24 @@ export const deleteEvent = async (req, res) => {
       return res.status(404).json({ code: "EVENT_NOT_FOUND" });
     }
 
-    await transporter.sendMail({
-      from: '"Daily Planner" <oquendodev@gmail.com>',
-      to: event.participants,
-      subject: `Cancelación: ${event.name}`,
-      html: `
-      <p>Hola, ${event.coordinator} ha cancelado ${event.name}</p>
-      <p>Descripción: ${event.description}</p>
-      <p>
-        <a href="${FRONTEND_URL}/planner/calendar"
-          style="display: inline-block; padding: 10px 20px; background-color: #4F46E5; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px;">
-          Ver Calendario
-        </a>
-      </p>
-    `,
-    });
+    if (event.participants.length > 0) {
+      await transporter.sendMail({
+        from: '"Daily Planner" <oquendodev@gmail.com>',
+        to: event.participants,
+        subject: `Cancelación: ${event.name}`,
+        html: `
+        <p>Hola, ${event.coordinator} ha cancelado ${event.name}</p>
+        <p>Descripción: ${event.description}</p>
+        <p>
+          <a href="${FRONTEND_URL}/planner/calendar"
+            style="display: inline-block; padding: 10px 20px; background-color: #4F46E5; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px;">
+            Ver Calendario
+          </a>
+        </p>
+      `,
+      });
+    }
+
     res.status(200).json(event);
   } catch (error) {
     console.log(error);
